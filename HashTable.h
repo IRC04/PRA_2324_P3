@@ -14,8 +14,8 @@ using namespace std;
 template <typename V>
 class HashTable: public Dict<V> {
 
-    private:
-        int n;
+private:
+	int n;
 	int max;
 	ListLinked<TableEntry<V>>* table;
 
@@ -32,66 +32,81 @@ class HashTable: public Dict<V> {
 		return sum % max;
 	};
 
-    public:
-        void insert(string key, V value) override {
-		for (int i=0; i<max; i++){
-			if (table[i].key == key){
-				throw runtime_error();
-			}
-		}
-		TableEntry (key, value);
-	}
+public:
+    HashTable(int size) : n(0), max(size) {
+        table = new ListLinked<TableEntry<V>>[max];
+    }
 
-        V search(string key) override {
-		for (int i=0; i<max; i++){
-                        if (table[i].key == key){
-                        	return table[i].value();
-			}
+    ~HashTable() {
+        delete[] table;
+    }
+
+    void insert(string key, V value) override {
+        int index = h(key);
+        ListLinked<TableEntry<V>>& bucket = table[index];
+        for (int i = 0; i < bucket.size(); ++i) {
+            if (bucket.get(i).key == key) {
+                throw runtime_error("La clave ya existe en el diccionario.");
+            }
+        }
+        bucket.insert(bucket.size(), TableEntry<V>(key, value));
+        ++n;
+    }
+
+    V search(string key) override {
+        int index = h(key);
+        ListLinked<TableEntry<V>>& bucket = table[index];
+        for (int i = 0; i < bucket.size(); ++i) {
+            if (bucket.get(i).key == key) {
+                return bucket.get(i).value;
+            }
+        }
+        throw runtime_error("Clave no encontrada en el diccionario.");
+    }
+
+    V remove(string key) override {
+        int index = h(key);
+        ListLinked<TableEntry<V>>& bucket = table[index];
+        for (int i = 0; i < bucket.size(); ++i) {
+            if (bucket.get(i).key == key) {
+                V value = bucket.get(i).value;
+                bucket.remove(i);
+                --n;
+                return value;
+            }
+        }
+        throw runtime_error("Clave no encontrada en el diccionario.");
+    }
+
+    int entries() override {
+        return n;
+    }
+
+    int capacity() {
+        return max;
+    }
+
+    friend ostream& operator<<(ostream &out, const HashTable<V> &ht) {
+        for (int i = 0; i < ht.max; ++i) {
+            out << "Cubeta " << i << ": ";
+            const ListLinked<TableEntry<V>>& bucket = ht.table[i];
+            if (bucket.size() == 0) {
+                out << "(vacía)";
+            } else {
+                for (int j = 0; j < bucket.size(); ++j) {
+                    out << "[" << bucket.get(j).key << " -> " << bucket.get(j).value << "] ";
                 }
-		throw runtime_error();
-	}
+            }
+            out << endl;
+        }
+        return out;
+    }
 
-        V remove(string key) override {
-		for (int i=0; i<max; i++){
-                        if (table[i].key == key){
-                                delete[] table[i];
-                        }
-                }
-                throw runtime_error();
-	}
+    V operator[](string key) {
+        return search(key);
+    }
 
-        int entries() override {
-		return n;
-	}
 
-	HashTable(int size) {
-		table = new ListLinked<TableEntry<V>>[size];
-		n = 0;
-        	max = size;
-	}
-
-	~HashTable() {
-		delete[] table;
-	}
-
-	int capacity() {
-		return max;
-	}
-
-	friend ostream& operator<<(ostream &out, const HashTable<V> &th) {
-		for (int i = 0; i < th.capacity(); ++i) {
-                	out << "Cubeta " << i << ": " << th.table[i] << endl;
-		}
-            	return out;
-	}
-
-	V operator[](string key) {
-		if(key.length()!=0){
-			return key;
-		} else {
-			throw runtime_error();
-		}
-	}
 };
 
 #endif
