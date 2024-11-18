@@ -38,6 +38,14 @@ class TableEntry {
                 return out;
         }
 
+	bool operator<(const TableEntry& other) const {
+        	return key < other.key;
+    	}
+
+    	bool operator>(const TableEntry& other) const {
+        	return key > other.key;
+    	}
+
 };
 
 #endif
