@@ -119,10 +119,15 @@ public:
         root = remove(root, e);
     }
 
+    T operator[](T e) const{
+        BSNode<T>* node = search(root, e);
+        return node->elem;
+    }
+
     friend ostream& operator<<(ostream &out, const BSTree<T> &bst) {
         bst.print_inorder(out, bst.root);
         return out;
-    }
+    } 
 };
 
 #endif 
